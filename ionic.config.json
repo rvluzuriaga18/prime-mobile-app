@@ -1,0 +1,7 @@
+{
+  "name": "primeApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
