@@ -1,0 +1,32 @@
+[
+    {
+        "type": "debug",
+        "url": {
+            "tokenEndpoint": "https://localhost:44377/oauth2/token",
+            "getUserIdentity": "https://localhost:44377/api/User/GetUserIdentity",
+            "getAllUsers": "https://localhost:44377/api/User/GetUserList",
+            "registerUser": "https://localhost:44377/api/User/Register/",
+            "updateUser": "https://localhost:44377/api/User/Update/"
+        }
+    },
+    {
+        "type": "dev",
+        "url": {
+            "tokenEndpoint": "https://localhost/primeapi/oauth2/token",
+            "getUserIdentity": "https://localhost/primeapi/api/User/GetUserIdentity",
+            "getAllUsers": "https://localhost/primeapi/api/User/GetUserList",
+            "registerUser": "https://localhost/primeapi/api/User/Register/",
+            "updateUser": "https://localhost/primeapi/api/User/Update/"
+        }
+    },
+    {
+        "type": "prod",
+        "url": {
+            "tokenEndpoint": "https://www.rvluzuriaga.somee.com/oauth2/token",
+            "getUserIdentity": "https://www.rvluzuriaga.somee.com/api/User/GetUserIdentity",
+            "getAllUsers": "https://www.rvluzuriaga.somee.com/api/User/GetUserList",
+            "registerUser": "https://www.rvluzuriaga.somee.com/api/User/Register/",
+            "updateUser": "https://www.rvluzuriaga.somee.com/api/User/Update/"
+        }
+    }
+]

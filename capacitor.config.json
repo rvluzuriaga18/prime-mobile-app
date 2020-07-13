@@ -1,6 +1,6 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "primeApp",
+  "appId": "com.prime.primeapp",
+  "appName": "Prime",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "build",

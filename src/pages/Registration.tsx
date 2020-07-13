@@ -1,49 +1,46 @@
 import {
   IonContent,
   IonHeader,
+  IonFooter,
   IonPage,
   IonTitle,
   IonToolbar,
-  IonSplitPane,
-  IonMenuButton,
-  IonList,
-  IonItem,
+  IonButton,
   IonLabel,
   IonInput,
   IonSelect,
   IonSelectOption,
-  IonRadioGroup,
-  IonRadio,
-  IonButtons,
-  IonButton,
-  IonFooter,
+  IonList,
+  IonItem,
   IonRow,
   IonCol,
+  IonRadioGroup,
+  IonRadio,
   IonAlert,
   IonLoading
 } from "@ionic/react";
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
+import { Redirect, Route } from "react-router-dom";
+import "./Registration.css";
 import OAuth2 from "fetch-mw-oauth2";
-import Menu from "./Menu";
-import "./Home.css";
 
-const Home: React.FC = () => {
-
+const Registration: React.FC = () => {
   const uri = JSON.parse(window.localStorage.getItem("uri") || "");
-  const pwd = window.localStorage.getItem("password") || "";
-  const data = JSON.parse(window.localStorage.getItem("personData") || "");
-  const listOfCountry = JSON.parse(window.localStorage.getItem("countries") || "");
 
-  const [countries] = useState<[]>(listOfCountry);
+  const [countries, setCountries] = useState([]);
+  const [cancelReg, cancelRegistration] = useState(false);
 
   const [showAlertBox, setAlertBox] = useState(false);
   const [showAlertMsg, setAlertMsg] = useState("");
+
   const [showAlertSuccess, setAlertSuccess] = useState(false);
   const [showAlertSuccessMsg, setAlertSuccessMsg] = useState("");
   const [showAlertFailed, setAlertFailed] = useState(false);
   const [showAlertFailedMsg, setAlertFailedMsg] = useState("");
+
   const [showLoading, setShowLoading] = useState(false);
 
+  const [isUserNameEmpty, setUserName] = useState(true);
   const [isPasswordEmpty, setPassword] = useState(true);
   const [isCPasswordEmpty, setCPassword] = useState(true);
   const [isTitleEmpty, setTitle] = useState(true);
@@ -55,67 +52,83 @@ const Home: React.FC = () => {
   const [isPostalCodeEmpty, setPostalCode] = useState(true);
   const [isCountryEmpty, setCountry] = useState(true);
 
-  const [businessEntityId] = useState<number>(data.BusinessEntityId);
-  const [username] = useState(String(data.Username));
-  const [password, setPasswordValue] = useState(pwd);
-  const [cpassword, setCPasswordValue] = useState(pwd);
-  const [title, setTitleValue] = useState(String(data.Person.Title));
-  const [firstName, setFirstNameValue] = useState(String(data.Person.FirstName));
-  const [middleName, setMiddleNameValue] = useState(data.Person.MiddleName != null ? String(data.Person.MiddleName) : "");
-  const [lastName, setLastNameValue] = useState(String(data.Person.LastName));
-  const [suffix, setSuffixValue] = useState(data.Person.Suffix != null ? String(data.Person.Suffix) : "");
-  const [age, setAgeValue] = useState(String(data.Person.Age));
-  const [addressLine1, setAddressLine1Value] = useState(String(data.PersonAddresses[0].AddressLine1));
-  const [city, setCityValue] = useState(String(data.PersonAddresses[0].City));
-  const [postalCode, setPostalCodeValue] = useState(String(data.PersonAddresses[0].PostalCode));
-  const [countryRegionCode, setCountryRegionCodeValue] = useState(data.PersonAddresses[0].CountryRegionCode);
-  const [addressType] = useState(5);
+  const personState = {
+    username: "",
+    password: "",
+    cpassword: "",
+    title: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    suffix: "",
+    age: "",
+    addressLine1: "",
+    addressLine2: null,
+    city: "",
+    postalCode: "",
+    countryRegionCode: "",
+    addressType: 5,
+  };
 
-  function update() {
+  const [person, setPerson] = useState(personState);
+
+  useEffect(() => {
+    fetch("../assets/countries.json")
+      .then((result) => result.json())
+      .then((result) => {
+        setCountries(result);
+      });
+  }, []);
+
+  function register() {
     let errorMsg: string = "";
 
-    if (password.trim().length === 0){
+    if (person.username.trim().length === 0){
+      errorMsg = "Please input Username.";
+      setUserName(false);
+    }
+    else if (person.password.trim().length === 0){
       errorMsg = "Please input Password.";
       setPassword(false);
     }
-    else if (cpassword.trim().length === 0){
+    else if (person.cpassword.trim().length === 0){
       errorMsg = "Please input Confirm Password.";
       setCPassword(false);
     }
-    else if (password !== cpassword){
+    else if (person.password !== person.cpassword){
       errorMsg = "Password did not match.";
       setPassword(false);
       setCPassword(false);
     }
-    else if (firstName.trim().length === 0){
+    else if (person.firstName.trim().length === 0){
       errorMsg = "Please input First Name.";
       setFirstName(false);
     }
-    else if (lastName.trim().length === 0){
+    else if (person.lastName.trim().length === 0){
       errorMsg = "Please input Last Name.";
       setLastName(false);
     }
-    else if (addressLine1.trim().length === 0){
+    else if (person.addressLine1.trim().length === 0){
       errorMsg = "Please input Address.";
       setAddress(false);
     }
-    else if (city.trim().length === 0){
+    else if (person.city.trim().length === 0){
       errorMsg = "Please input City / Province.";
       setCity(false);
     }
-    else if (postalCode.trim().length === 0){
+    else if (person.postalCode.trim().length === 0){
       errorMsg = "Please input valid Postal Code.";
       setPostalCode(false);
     }
-    else if (countryRegionCode.length === 0){
+    else if (person.countryRegionCode.length === 0){
       errorMsg = "Please select Country.";
       setCountry(false);
     }
-    else if (title.length === 0){
+    else if (person.title.length === 0){
       errorMsg = "Please select Gender.";
       setTitle(false);
     }
-    else if (age.trim().length === 0){
+    else if (person.age.trim().length === 0){
       errorMsg = "Please input valid Age.";
       setAge(false);
     }
@@ -126,40 +139,38 @@ const Home: React.FC = () => {
     }    
     else {
       setShowLoading(true);
+
       const tokenEndpoint = uri[0].url.tokenEndpoint;
-      const updateUser = uri[0].url.updateUser;
+      const registerUser = uri[0].url.registerUser;
       
       const oauth2 = new OAuth2({
         grantType: "password",
         clientId: "clientId101",
         clientSecret: "clientSecret101",
-        userName: "admin",
-        password: "system",
+        userName: 'admin',
+        password: 'system',
         tokenEndpoint: tokenEndpoint,
       });
 
       // Mapping
       const mappedRequest: any = {
-        "BusinessEntityId": businessEntityId,
-        "Username": username,
-        "Password": password,
+        "Username": person.username,
+        "Password": person.password,
         "Person": {
-          "BusinessEntityId": businessEntityId,          
-          "Title": title,
-          "FirstName": firstName,
-          "MiddleName": middleName !== "" ? middleName : null,
-          "LastName": lastName,
-          "Suffix": suffix !== "" ? suffix : null,
-          "Age": age
+          "Title": person.title,
+          "FirstName": person.firstName,
+          "MiddleName": person.middleName,
+          "LastName": person.lastName,
+          "Suffix": person.suffix,
+          "Age": person.age
         },
         "PersonAddresses":[{
-          "BusinessEntityId": businessEntityId,
-          "AddressLine1": addressLine1,
-          "AddressLine2": null,
-          "City": city,
-          "PostalCode": postalCode,
-          "CountryRegionCode": countryRegionCode,
-          "AddressTypeId": addressType
+          "AddressLine1": person.addressLine1,
+          "AddressLine2": person.addressLine2,
+          "City": person.city,
+          "PostalCode": person.postalCode,
+          "CountryRegionCode": person.countryRegionCode,
+          "AddressTypeId": person.addressType
         }]
       };
       
@@ -167,7 +178,7 @@ const Home: React.FC = () => {
       const request = JSON.parse(jsonString);
 
       oauth2
-      .fetch(updateUser,{method: "POST",
+      .fetch(registerUser,{method: "POST",
                               headers: {  'Content-Type': 'application/json'}, 
                               body: JSON.stringify(request)})
       .then((response) => response.json())
@@ -176,8 +187,9 @@ const Home: React.FC = () => {
     }
 
     function processSuccessResponse(data: any){
-      setShowLoading(false); 
-      if (data.IsSuccess){
+      setShowLoading(false);
+
+      if(data.IsSuccess){
         setAlertSuccessMsg("Record successfully saved.");
         setAlertSuccess(true);
       }
@@ -187,48 +199,48 @@ const Home: React.FC = () => {
       }
     }
 
-    function processFailedResponse(error: any) {    
+    function processFailedResponse(error: any) {
       let message: any;
-      setShowLoading(false); 
+      setShowLoading(false);
 
       if (error.message === "Failed to fetch")
         message = "Unable to connect to the server.";
-      else message = "Unable to update your data. Please contact the system administrator.";
+      else message = "Unable to save your data. Please contact the system administrator.";
 
       setAlertFailedMsg(message);
       setAlertFailed(true);
     }
   }
-
+  
   return (
-    <IonSplitPane contentId="main">
-      <Menu />
-      <IonPage id="main">
-        <IonHeader>
-          <IonToolbar color="light">
-            <IonButtons slot="start">
-              <IonMenuButton />
-            </IonButtons>
-            <IonTitle>User Details</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding ion-text-center">
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle className="ion-text-center">Registration</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
         <IonList>
-          <IonItem>
-            <IonLabel position="floating">
+          <IonItem style={isUserNameEmpty ? {"--border-color": "#dedede"} : {"--border-color": "#eb445a"}}>
+            <IonLabel position="floating" color={isUserNameEmpty ? "medium" : "danger"}>
               Username *
             </IonLabel>
-            <IonInput value={username} disabled={true}></IonInput>
+            <IonInput
+              onIonFocus={() => setUserName(true)}
+              onIonChange={(e: any) =>
+                setPerson({ ...person, username: e.target.value })
+              }
+              maxlength={50}
+            ></IonInput>
           </IonItem>
           <IonItem style={isPasswordEmpty ? {"--border-color": "#dedede"} : {"--border-color": "#eb445a"}}>
             <IonLabel position="floating" color={isPasswordEmpty ? "medium" : "danger"}>
               Password *
             </IonLabel>
             <IonInput
-              value={password}
               onIonFocus={() => setPassword(true)}
-              onIonInput={(e: any) =>
-                setPasswordValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, password: e.target.value })
               }
               type="password"
               maxlength={100}
@@ -239,24 +251,22 @@ const Home: React.FC = () => {
               Confirm Password *
             </IonLabel>
             <IonInput
-              value={cpassword}
               onIonFocus={() => setCPassword(true)}
-              onIonInput={(e: any) =>
-                setCPasswordValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, cpassword: e.target.value })
               }
               type="password"
               maxlength={100}
             ></IonInput>
-          </IonItem>      
+          </IonItem>
           <IonItem style={isFirstNameEmpty ? {"--border-color": "#dedede"} : {"--border-color": "#eb445a"}}>
             <IonLabel position="floating" color={isFirstNameEmpty ? "medium" : "danger"}>
               First Name *
             </IonLabel>
             <IonInput
-              value={firstName}
               onIonFocus={() => setFirstName(true)}
-              onIonInput={(e: any) =>
-                setFirstNameValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, firstName: e.target.value })
               }
               maxlength={100}
             ></IonInput>
@@ -266,9 +276,8 @@ const Home: React.FC = () => {
               Middle Name
             </IonLabel>
             <IonInput
-              value={middleName}
-              onIonInput={(e: any) =>
-                setMiddleNameValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, middleName: e.target.value })
               }
               maxlength={100}
             ></IonInput>
@@ -278,10 +287,9 @@ const Home: React.FC = () => {
               Last Name *
             </IonLabel>
             <IonInput
-             value={lastName}
               onIonFocus={() => setLastName(true)}
-              onIonInput={(e: any) =>
-                setLastNameValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, lastName: e.target.value })
               }
               maxlength={100}
             ></IonInput>
@@ -291,9 +299,8 @@ const Home: React.FC = () => {
               Suffix
             </IonLabel>
             <IonInput
-              value={suffix}
-              onIonInput={(e: any) =>
-                setSuffixValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, suffix: e.target.value })
               }
               maxlength={10}
             ></IonInput>
@@ -303,10 +310,9 @@ const Home: React.FC = () => {
               Address *
             </IonLabel>
             <IonInput
-              value={addressLine1}
               onIonFocus={() => setAddress(true)}
-              onIonInput={(e: any) =>
-                setAddressLine1Value(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, addressLine1: e.target.value })
               }
               maxlength={60}
             ></IonInput>
@@ -316,10 +322,9 @@ const Home: React.FC = () => {
               City / Province *
             </IonLabel>
             <IonInput
-              value={city}
               onIonFocus={() => setCity(true)}
-              onIonInput={(e: any) =>
-                setCityValue(e.target.value)
+              onIonChange={(e: any) =>
+                setPerson({ ...person, city: e.target.value })
               }
               maxlength={30}
             ></IonInput>
@@ -330,11 +335,11 @@ const Home: React.FC = () => {
             </IonLabel>
             <IonInput
               onIonFocus={() => setPostalCode(true)}
-              value={postalCode}
+              value={person.postalCode}
               onIonInput={(e: any) =>
                 isNaN(Number(e.target.value))
                   ? e.preventDefault()
-                  : setPostalCodeValue(e.target.value)
+                  : setPerson({ ...person, postalCode: e.target.value })
               }
               maxlength={15}
             ></IonInput>
@@ -344,10 +349,9 @@ const Home: React.FC = () => {
               Country *
             </IonLabel>
             <IonSelect
-              value={countryRegionCode}
               onIonFocus={() => setCountry(true)}
               onIonChange={(e: any) =>
-                setCountryRegionCodeValue(e.target.value) 
+                setPerson({ ...person, countryRegionCode: e.target.value })
               }
               interface="action-sheet"
             >
@@ -356,7 +360,7 @@ const Home: React.FC = () => {
               ))}
             </IonSelect>
           </IonItem>
-          <IonRadioGroup value={title}>
+          <IonRadioGroup>
             <IonItem lines="none">
               <IonLabel color={isTitleEmpty ? "medium" : "danger"}>Gender *</IonLabel>
             </IonItem>
@@ -365,7 +369,7 @@ const Home: React.FC = () => {
               <IonRadio
                 onIonFocus={() => setTitle(true)}
                 onClick={(e: any) =>
-                  setTitleValue(e.target.value)
+                  setPerson({ ...person, title: e.target.value })
                 }
                 color="primary"
                 value="Mr"
@@ -377,7 +381,7 @@ const Home: React.FC = () => {
               <IonRadio
                 onIonFocus={() => setTitle(true)}
                 onClick={(e: any) =>
-                  setTitleValue(e.target.value)
+                  setPerson({ ...person, title: e.target.value })
                 }
                 color="primary"
                 value="Ms"
@@ -390,17 +394,31 @@ const Home: React.FC = () => {
               Age *
             </IonLabel>
             <IonInput
-              value={age}
+              value={person.age}
               onIonFocus={() => setAge(true)}
               onIonInput={(e: any) =>
                 isNaN(Number(e.target.value))
                   ? e.preventDefault()
-                  : setAgeValue(e.target.value)
+                  : setPerson({ ...person, age: e.target.value })
               }
               maxlength={3}
             ></IonInput>
           </IonItem>
-        </IonList>               
+        </IonList>     
+        <Route
+          render={() => {
+            return (
+              cancelReg && (
+                <Redirect
+                  to={{
+                    pathname: "/login",
+                    state: { register: false, cancelReg: false },
+                  }}
+                />
+              )
+            );
+          }}
+        ></Route>
         <IonAlert
           isOpen={showAlertBox}
           onDidDismiss={() => setAlertBox(false)}
@@ -419,7 +437,7 @@ const Home: React.FC = () => {
             {
               text: 'Ok',
               handler: () => {
-                console.log("Ok");
+                cancelRegistration(true)
               }
             }
           ]}
@@ -442,32 +460,41 @@ const Home: React.FC = () => {
             {
               text: 'Retry',
               handler: () => {
-                update();
+                register()
               }
             }
           ]}
         />        
-        <IonLoading isOpen={showLoading} message={"Updating your record. Please wait..."} /> 
-        </IonContent>
-        <IonFooter>
+        <IonLoading isOpen={showLoading} message={"Saving your record. Please wait..."} />           
+      </IonContent>
+      <IonFooter>
         <IonToolbar>
           <IonRow>
-            <IonCol>
+            <IonCol size="6">
               <IonButton
-                onClick={() => update()}
+                onClick={() => register()}
                 className="ion-text-center"
                 expand="block"
                 color="success"
               >
-                Update
+                Register
+              </IonButton>
+            </IonCol>
+            <IonCol size="6">
+              <IonButton
+                onClick={() => cancelRegistration(true)}
+                className="ion-text-center"
+                color="medium"
+                expand="block"
+              >
+                Cancel
               </IonButton>
             </IonCol>
           </IonRow>
         </IonToolbar>
       </IonFooter>
-      </IonPage>
-    </IonSplitPane>
+    </IonPage>
   );
 };
 
-export default Home;
+export default Registration;
